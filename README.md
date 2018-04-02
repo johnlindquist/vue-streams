@@ -24,17 +24,17 @@ Vue.use(VueStreams, { Subject, BehaviorSubject })
   </div>
 </template>
 <script>
-import { fromMethod } from "vue-streams"
-import { map } from "rxjs/operators"
+import { fromMethod } from "vue-streams";
+import { map } from "rxjs/operators";
 
 export default {
   sources: {
     click$: fromMethod
   },
-  subscriptions: {
-    random$: ({ click$ }) => click$.pipe(map(() => Math.random()))
-  }
-}
+  subscriptions: ({ click$ }) => ({
+    random$: click$.pipe(map(() => Math.random()))
+  })
+};
 </script>
 ```
 
@@ -47,44 +47,69 @@ export default {
   <div id="demo">
     <label>Search <input type="text" v-model="term"></label>
     <button @click="term = ''">Clear</button>
+    <h2 v-if="noResults$">
+      {{message$}}
+    </h2>
     <transition-group tag="div" name="fade" class="people">
       <div v-for="person of people$" :key="person.id">
         <h2>{{person.name}}</h2>
         <img :src="`${URL}/${person.image}`" alt="">
       </div>
+
     </transition-group>
+
   </div>
 </template>
 <script>
-import { fromWatch } from "vue-streams";
-import { merge } from "rxjs";
-import { switchMap, map, pluck, partition } from "rxjs/operators";
-import { ajax } from "rxjs/ajax";
+import { fromWatch } from "vue-streams"
+import { merge } from "rxjs"
+import {
+  switchMap,
+  map,
+  mapTo,
+  pluck,
+  partition,
+  debounceTime,
+  share
+} from "rxjs/operators"
+import { ajax } from "rxjs/ajax"
 
-const URL = `https://foamy-closet.glitch.me`;
+const URL = `https://foamy-closet.glitch.me`
 
 export default {
   data() {
-    return { URL, term: "sky" };
+    return { URL, term: "sky" }
   },
   sources: {
     term$: fromWatch("term")
   },
-  subscriptions: {
-    people$: ({ term$ }) => {
-      const [search$, empty$] = term$.pipe(partition(term => term.length));
+  subscriptions: ({ term$ }) => {
+    const [search$, empty$] = term$.pipe(
+      debounceTime(250),
+      partition(term => term.length)
+    )
 
-      return merge(
-        search$.pipe(
-          switchMap(term =>
-            ajax(`${URL}/people?name_like=${term}`).pipe(pluck("response"))
+    const people$ = merge(
+      search$.pipe(
+        switchMap(term =>
+          ajax(`${URL}/people?name_like=${term}`).pipe(
+            share(),
+            pluck("response")
           )
-        ),
-        empty$.pipe(map(() => []))
-      );
-    }
+        )
+      ),
+      empty$.pipe(map(() => []))
+    )
+
+    const noResults$ = people$.pipe(map(result => result.length === 0))
+    const message$ = merge(
+      noResults$.pipe(mapTo("No results 😢")),
+      empty$.pipe(mapTo("Please type something 👍"))
+    )
+
+    return { people$, noResults$, message$ }
   }
-};
+}
 </script>
 <style>
 #demo {
@@ -95,8 +120,8 @@ export default {
   flex-wrap: wrap;
 }
 
-.people > *{
-  padding: .25rem;
+.people > * {
+  padding: 0.25rem;
 }
 .fade-enter-active,
 .fade-leave-active {
@@ -132,49 +157,50 @@ export default {
   </div>
 </template>
 <script>
-import { merge, interval } from "rxjs"
-import { ajax } from "rxjs/ajax"
-import { map, mapTo, switchMap, pluck } from "rxjs/operators"
-import { fromMethod, fromWatch } from "vue-streams"
+import { merge, interval } from "rxjs";
+import { ajax } from "rxjs/ajax";
+import { map, mapTo, switchMap, pluck } from "rxjs/operators";
+import { fromMethod, fromWatch } from "vue-streams";
 
 export default {
   data() {
     return {
       show: false,
       text: "john"
-    }
+    };
   },
   sources: {
-    one$: fromMethod, //infer method name from key
-    two$: fromMethod("two"), //manually map method name
+    one$: fromMethod,
+    two$: fromMethod("two"),
     load$: fromMethod,
     enter$: fromMethod,
-    text$: fromWatch("text") //manually map data property
+    text$: fromWatch("text")
   },
-  streams: {
-    buttons$: ({ one$, two$, enter$ }) =>
-      merge(
-        one$.pipe(mapTo(1)),
-        two$.pipe(mapTo(2)),
-        enter$.pipe(mapTo("fade in..."))
-      ),
-    date$: () => interval(4000).pipe(map(() => new Date().toString())),
-    person$: ({ load$ }) =>
-      load$.pipe(
-        switchMap(() =>
-          ajax(
-            `https://foamy-closet.glitch.me/people/${Math.floor(
-              Math.random() * 10
-            )}`
-          ).pipe(pluck("response", "name"))
-        )
+
+  subscriptions: ({ one$, two$, load$, enter$, text$ }) => {
+    const buttons$ = merge(
+      one$.pipe(mapTo(1)),
+      two$.pipe(mapTo(2)),
+      enter$.pipe(mapTo("fade in..."))
+    );
+    const date$ = interval(4000).pipe(map(() => new Date().toString()));
+    const person$ = load$.pipe(
+      switchMap(() =>
+        ajax(
+          `https://foamy-closet.glitch.me/people/${Math.floor(
+            Math.random() * 10
+          )}`
+        ).pipe(pluck("response", "name"))
       )
-  },
-  subscriptions: {
-    message$: ({ text$, buttons$, date$, person$ }) =>
-      merge(person$, text$, date$, buttons$)
+    );
+
+    const message$ = merge(person$, text$, date$, buttons$);
+
+    return {
+      message$
+    };
   }
-}
+};
 </script>
 <style>
 #demo {

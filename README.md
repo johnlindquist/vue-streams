@@ -254,4 +254,6 @@ export default {
 
 ## Other Demos
 
+### Basic Vue Counter
+
 [![Basic Vue Counter](https://codesandbox.io/static/img/play-codesandbox.svg)](https://codesandbox.io/s/21zv0jqz40)

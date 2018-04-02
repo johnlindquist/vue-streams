@@ -4,20 +4,32 @@ export enum Source {
   fromWatch
 }
 
-export const fromMethod = name => ({
-  type: Source.fromMethod,
-  name
-})
+export const fromMethod = name => {
+  const config = {
+    type: Source.fromMethod,
+    name
+  }
 
-export const fromWatch = name => ({
-  type: Source.fromWatch,
-  name
-})
+  return name ? () => config : config
+}
 
-export const fromEmit = name => ({
-  type: Source.fromEmit,
-  name
-})
+export const fromWatch = name => {
+  const config = {
+    type: Source.fromWatch,
+    name
+  }
+
+  return name ? () => config : config
+}
+
+export const fromEmit = name => {
+  const config = {
+    type: Source.fromWatch,
+    name
+  }
+
+  return name ? () => config : config
+}
 
 function VueStreams(Vue, { Subject, BehaviorSubject }) {
   Vue.mixin({
@@ -33,7 +45,6 @@ function VueStreams(Vue, { Subject, BehaviorSubject }) {
         Object.keys(sources).forEach(sourceName => {
           if (typeof sources[sourceName] === "function") {
             const { type, name = sourceName } = sources[sourceName]()
-
             switch (type) {
               case Source.fromMethod:
                 const methodSubject = (sourcesConfig[
@@ -41,9 +52,13 @@ function VueStreams(Vue, { Subject, BehaviorSubject }) {
                 ] = new Subject())
 
                 vm._streamKeysToDelete.push(name)
-                vm[name] = methodSubject.next.bind(methodSubject, event)
+                vm[name] = methodSubject.next.bind(methodSubject)
                 break
               case Source.fromWatch:
+                if (!vm[name]) {
+                  vm._streamKeysToDelete.push(name)
+                  ;(Vue as any).util.defineReactive(vm, name, undefined)
+                }
                 const watchSubject = (sourcesConfig[
                   sourceName
                 ] = new BehaviorSubject(vm[name]))

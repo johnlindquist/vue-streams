@@ -6,7 +6,8 @@ A simplified approach to using Streams with Vue.
 
 ```js
 import VueStreams from "vue-streams"
-Vue.use(VueStreams)
+import { Subject, BehaviorSubject } from "rxjs"
+Vue.use(VueStreams, { Subject, BehaviorSubject })
 ```
 
 ## Usage

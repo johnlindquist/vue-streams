@@ -1,4 +1,4 @@
-# Vue Streams
+# Vue Streams ⛲️
 
 A simplified approach to using Streams with Vue.
 

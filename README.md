@@ -40,6 +40,8 @@ export default {
 
 ### Crazy Example
 
+[![Crazy Example](https://codesandbox.io/static/img/play-codesandbox.svg)](https://codesandbox.io/s/48jyk13nm7)
+
 ```js
 <template>
   <div id="demo">

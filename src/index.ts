@@ -1,5 +1,3 @@
-import { Subject, BehaviorSubject } from "rxjs"
-
 export enum Source {
   fromMethod,
   fromEmit,
@@ -21,7 +19,7 @@ export const fromEmit = name => ({
   name
 })
 
-function VueStreams(Vue) {
+function VueStreams(Vue, { Subject, BehaviorSubject }) {
   Vue.mixin({
     created() {
       const vm = this

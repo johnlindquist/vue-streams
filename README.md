@@ -13,6 +13,8 @@ Vue.use(VueStreams)
 
 ### Simple Example
 
+[![Simple Example](https://codesandbox.io/static/img/play-codesandbox.svg)](https://codesandbox.io/s/yv37425lox)
+
 ```js
 <template>
   <div>

@@ -1,8 +1,18 @@
-# Vue Streams ⛲️
+# ⛲️ vue-streams ⛲️
 
 A simplified approach to using Streams with Vue.
 
+## Install
+
+```bash
+npm i vue-streams rxjs@rc
+```
+
+rxjs v6 is recommended (current in Release Candidate)
+
 ## Setup
+
+In your `main.js`
 
 ```js
 import VueStreams from "vue-streams"

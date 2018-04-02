@@ -24,7 +24,7 @@ export const fromWatch = name => {
 
 export const fromEmit = name => {
   const config = {
-    type: Source.fromWatch,
+    type: Source.fromEmit,
     name
   }
 
@@ -68,9 +68,7 @@ function VueStreams(Vue, { Subject, BehaviorSubject }) {
                 break
               case Source.fromEmit:
                 const emitSubject = (sourcesConfig[sourceName] = new Subject())
-
                 vm._streamKeysToDelete.push(name)
-                vm[name] = emitSubject.next.bind(emitSubject, event)
                 vm.$on(name, emitSubject.next.bind(emitSubject))
                 vm._streamKeysToOff.push(name)
                 break
@@ -80,7 +78,7 @@ function VueStreams(Vue, { Subject, BehaviorSubject }) {
       }
 
       if (subscriptions) {
-        const subs = subscriptions(sourcesConfig)
+        const subs = subscriptions(sourcesConfig) || {}
         vm._subscriptions = Object.keys(subs).map(key => {
           ;(Vue as any).util.defineReactive(vm, key, undefined)
 
@@ -90,7 +88,7 @@ function VueStreams(Vue, { Subject, BehaviorSubject }) {
         })
       }
     },
-    beforeDestroy() {
+    destroy() {
       const vm = this
       const { _subscriptions } = vm
       if (_subscriptions) {

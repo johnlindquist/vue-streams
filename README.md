@@ -39,11 +39,11 @@ import { map } from "rxjs/operators";
 
 export default {
   sources: {
-    click$: fromMethod
+    click$: fromMethod //infer the method name "click$" from the key
   },
   subscriptions: ({ click$ }) => ({
     random$: click$.pipe(map(() => Math.random()))
-  })
+  }) //template subscribes to each key of the returned object
 };
 </script>
 ```
@@ -150,7 +150,8 @@ export default {
 
 ```js
 <template>
-  <div id="demo">
+  <div id="demo" @mousemove="x = $event.x">
+    <h3>{{x$}}</h3>
     <button @click="one$">One</button>
     <button @click="two">Two</button>
     <button @click="load$">Load Random</button>
@@ -164,36 +165,59 @@ export default {
     <h2>
       {{message$}}
     </h2>
+    <MiniComp v-if="show"></MiniComp>
   </div>
 </template>
 <script>
-import { merge, interval } from "rxjs";
-import { ajax } from "rxjs/ajax";
-import { map, mapTo, switchMap, pluck } from "rxjs/operators";
-import { fromMethod, fromWatch } from "vue-streams";
+import { merge, interval } from "rxjs"
+import { ajax } from "rxjs/ajax"
+import { map, mapTo, switchMap, pluck, throttleTime } from "rxjs/operators"
+import { fromMethod, fromWatch, fromEmit } from "vue-streams"
+
+const MiniComp = {
+  sources: {
+    mounted$: fromEmit("hook:mounted"),
+    beforeDestroy$: fromEmit("hook:beforeDestroy")
+  },
+  subscriptions: ({ mounted$, beforeDestroy$ }) => {
+    mounted$.subscribe(value => console.log("hello!"))
+    beforeDestroy$.subscribe(value => console.log("BYE! 🤪"))
+  },
+  render(h) {
+    return (
+      <div>
+        <h2>MiniComp</h2>
+      </div>
+    )
+  }
+}
 
 export default {
+  components: {
+    MiniComp
+  },
   data() {
     return {
       show: false,
       text: "john"
-    };
+    }
   },
   sources: {
     one$: fromMethod,
     two$: fromMethod("two"),
     load$: fromMethod,
     enter$: fromMethod,
-    text$: fromWatch("text")
+    text$: fromWatch("text"),
+    x: fromWatch
   },
 
-  subscriptions: ({ one$, two$, load$, enter$, text$ }) => {
+  subscriptions: ({ one$, two$, load$, enter$, text$, x }) => {
     const buttons$ = merge(
       one$.pipe(mapTo(1)),
       two$.pipe(mapTo(2)),
       enter$.pipe(mapTo("fade in..."))
-    );
-    const date$ = interval(4000).pipe(map(() => new Date().toString()));
+    )
+    const date$ = interval(4000).pipe(map(() => new Date().toString()))
     const person$ = load$.pipe(
       switchMap(() =>
         ajax(
@@ -202,15 +226,16 @@ export default {
           )}`
         ).pipe(pluck("response", "name"))
       )
-    );
+    )
 
-    const message$ = merge(person$, text$, date$, buttons$);
+    const message$ = merge(person$, text$, date$, buttons$)
 
     return {
-      message$
-    };
+      message$,
+      x$: x.pipe(throttleTime(100))
+    }
   }
-};
+}
 </script>
 <style>
 #demo {

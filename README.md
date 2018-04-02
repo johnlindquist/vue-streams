@@ -1,6 +1,6 @@
 # ⛲️ vue-streams ⛲️
 
-A simplified approach to using Streams with Vue.
+A simplified approach to using streams with Vue.
 
 ## Install
 
@@ -8,11 +8,11 @@ A simplified approach to using Streams with Vue.
 npm i vue-streams rxjs@rc
 ```
 
-rxjs v6 is recommended (current in Release Candidate)
+rxjs v6 is recommended (currently in Release Candidate)
 
 ## Setup
 
-In your `main.js`
+Install as a plugin:
 
 ```js
 import VueStreams from "vue-streams"

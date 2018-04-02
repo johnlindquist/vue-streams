@@ -1,0 +1,11 @@
+{
+  "compilerOptions": {
+    "module": "commonjs",
+    "target": "es5",
+    "lib": ["dom", "es2016"],
+    "outDir": "./dist",
+    "moduleResolution": "node",
+    "preserveConstEnums": true
+  },
+  "include": ["./src"]
+}

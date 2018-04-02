@@ -1,0 +1,35 @@
+{
+  "name": "vue-streams",
+  "version": "1.0.0-beta.1",
+  "description": "Streams for Vue",
+  "main": "dist/index.js",
+  "files": [
+    "dist"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/johnlindquist/vue-streams.git"
+  },
+  "keywords": [
+    "vue",
+    "streams",
+    "rx",
+    "rxjs"
+  ],
+  "author": "John Lindquist",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/johnlindquist/vue-streams/issues"
+  },
+  "homepage": "https://github.com/johnlindquist/vue-streams#readme",
+  "scripts": {
+    "dev": "tsc -w",
+    "build": "tsc"
+  },
+  "devDependencies": {
+    "rxjs": "^6.0.0-rc.0",
+    "rxjs-compat": "^6.0.0-rc.0",
+    "typescript": "^2.8.1",
+    "vue": "^2.5.16"
+  }
+}

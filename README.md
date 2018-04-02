@@ -47,7 +47,7 @@ export default {
   <div id="demo">
     <label>Search <input type="text" v-model="term"></label>
     <button @click="term = ''">Clear</button>
-    <transition-group tag="div" name="fade">
+    <transition-group tag="div" name="fade" class="people">
       <div v-for="person of people$" :key="person.id">
         <h2>{{person.name}}</h2>
         <img :src="`${URL}/${person.image}`" alt="">
@@ -56,23 +56,23 @@ export default {
   </div>
 </template>
 <script>
-import { fromWatch } from "vue-streams"
-import { merge } from "rxjs"
-import { switchMap, map, pluck, partition } from "rxjs/operators"
-import { ajax } from "rxjs/ajax"
+import { fromWatch } from "vue-streams";
+import { merge } from "rxjs";
+import { switchMap, map, pluck, partition } from "rxjs/operators";
+import { ajax } from "rxjs/ajax";
 
-const URL = `https://foamy-closet.glitch.me`
+const URL = `https://foamy-closet.glitch.me`;
 
 export default {
   data() {
-    return { URL, term: "sky" }
+    return { URL, term: "sky" };
   },
   sources: {
     term$: fromWatch("term")
   },
   subscriptions: {
     people$: ({ term$ }) => {
-      const [search$, empty$] = term$.pipe(partition(term => term.length))
+      const [search$, empty$] = term$.pipe(partition(term => term.length));
 
       return merge(
         search$.pipe(
@@ -81,14 +81,22 @@ export default {
           )
         ),
         empty$.pipe(map(() => []))
-      )
+      );
     }
   }
-}
+};
 </script>
 <style>
 #demo {
   font-family: "Avenir";
+}
+.people {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.people > *{
+  padding: .25rem;
 }
 .fade-enter-active,
 .fade-leave-active {

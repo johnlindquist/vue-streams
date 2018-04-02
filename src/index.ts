@@ -40,7 +40,7 @@ function VueStreams(Vue, { Subject, BehaviorSubject }) {
       vm._streamKeysToOff = []
 
       const sourcesConfig = {}
-      const { sources = {}, streams, subscriptions } = vm.$options as any
+      const { sources = {}, subscriptions } = vm.$options as any
       if (sources) {
         Object.keys(sources).forEach(sourceName => {
           if (typeof sources[sourceName] === "function") {
@@ -87,19 +87,11 @@ function VueStreams(Vue, { Subject, BehaviorSubject }) {
       }
 
       if (subscriptions) {
-        const appliedStreams = streams
-          ? Object.keys(streams).reduce((acc, key) => {
-              acc[key] = streams[key](sourcesConfig)
-              return acc
-            }, {})
-          : {}
-        vm._subscriptions = Object.keys(subscriptions).map(key => {
+        const subs = subscriptions(sourcesConfig)
+        vm._subscriptions = Object.keys(subs).map(key => {
           ;(Vue as any).util.defineReactive(vm, key, undefined)
 
-          return subscriptions[key]({
-            ...appliedStreams,
-            ...sourcesConfig
-          }).subscribe(value => {
+          return subs[key].subscribe(value => {
             vm[key] = value
           })
         })

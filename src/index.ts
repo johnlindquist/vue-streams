@@ -80,13 +80,6 @@ function VueStreams(Vue, { Subject, BehaviorSubject }) {
       }
 
       if (subscriptions) {
-        Object.keys(subscriptions).map(key => {
-          vm._streamKeysToDelete.push(key)
-          ;(Vue as any).util.defineReactive(vm, key, undefined)
-        })
-      }
-
-      if (subscriptions) {
         const subs = subscriptions(sourcesConfig)
         vm._subscriptions = Object.keys(subs).map(key => {
           ;(Vue as any).util.defineReactive(vm, key, undefined)
